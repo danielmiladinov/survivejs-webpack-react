@@ -1,11 +1,15 @@
 const path = require('path');
+const merge = require('webpack-merge');
+
 const FOLDERS = ['app', 'build'];
 const PATHS = FOLDERS.reduce(
-  (ps, f) => Object.assign(ps, { [f]: path.join(__dirname, f) }), 
+  (ps, f) => Object.assign(ps, { [f]: path.join(__dirname, f) }),
   {}
 );
 
-module.exports = {
+const common = {
+  // Entry accepts a path or an object of entries. We'll be using the
+  // latter form given it's convenient with more complex configurations.
   entry: {
     app: PATHS.app
   },
@@ -14,3 +18,12 @@ module.exports = {
     filename: 'bundle.js'
   }
 };
+
+// Default configuration. Return this if webpack is called outside of npm.
+if (TARGET === 'start' || !TARGET) {
+  module.exports = merge(common, {});
+}
+
+if (TARGET === 'build') {
+  module.exports = merge(common, {});
+}
