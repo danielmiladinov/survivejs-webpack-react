@@ -18,6 +18,18 @@ const common = {
   output: {
     path: PATHS.build,
     filename: 'bundle.js'
+  },
+  module: {
+    loaders: [
+      {
+        // Test expects a RegExp, note the slashes
+        test: /\.css$/,
+        // loaders are evaluated from right to left: so css-loader first, then style-loader
+        loaders: ['style', 'css'],
+        // Include accepts either a path or an array of paths
+        include: PATHS.app
+      }
+    ]
   }
 };
 
