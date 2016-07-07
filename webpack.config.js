@@ -89,6 +89,10 @@ if (TARGET === 'start' || !TARGET) {
 if (TARGET === 'build') {
   module.exports = merge(common, {
     plugins: [
+      // Coerce NODE_ENV to "production" to trick React into building itself that much smaller
+      new webpack.DefinePlugin({
+        'process.env.NODE_ENV': '"production"'
+      }),
       new webpack.optimize.UglifyJsPlugin({
         compress: {
           warnings: false
