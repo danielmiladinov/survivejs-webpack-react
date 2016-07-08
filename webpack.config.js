@@ -10,6 +10,9 @@ const PATHS = FOLDERS.reduce(
   {}
 );
 
+// Load *package.json* so we can use `dependencies` from there
+const pkg = require('./package.json');
+
 process.env.BABEL_ENV = TARGET;
 
 const common = {
@@ -24,7 +27,7 @@ const common = {
   },
   output: {
     path: PATHS.build,
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   module: {
     loaders: [
@@ -88,7 +91,22 @@ if (TARGET === 'start' || !TARGET) {
 
 if (TARGET === 'build') {
   module.exports = merge(common, {
+    // Define vendor entry point needed for splitting
+    entry: {
+      // Exclude alt-utils as it won't work with this setup,
+      // due to the way the package has been designed - (no package.json main).
+      vendor: Object.keys(pkg.dependencies).filter((v) => v !== 'alt-utils')
+    },
+    output: {
+      path: PATHS.build,
+      filename: '[name].[chunkhash].js',
+      chunkFilename: '[chunkhash].js'
+    },
     plugins: [
+      // Extract vendor and manifest files
+      new webpack.optimize.CommonsChunkPlugin({
+        names: ['vendor', 'manifest']
+      }),
       // Coerce NODE_ENV to "production" to trick React into building itself that much smaller
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': '"production"'
