@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const NpmInstallPlugin = require('npm-install-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TARGET = process.env.npm_lifecycle_event;
 
 const FOLDERS = ['app', 'build'];
@@ -51,7 +52,15 @@ const common = {
         include: PATHS.app
       }
     ]
-  }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'node_modules/html-webpack-template/index.ejs',
+      title: 'Kanban app',
+      appMountId: 'app',
+      inject: false
+    })
+  ]
 };
 
 // Default configuration. Return this if webpack is called outside of npm.
