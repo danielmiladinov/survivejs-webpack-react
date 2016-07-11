@@ -4,6 +4,7 @@ const merge = require('webpack-merge');
 const NpmInstallPlugin = require('npm-install-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanPlugin = require('clean-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const TARGET = process.env.npm_lifecycle_event;
 
 const FOLDERS = ['app', 'build'];
@@ -33,14 +34,6 @@ const common = {
   },
   module: {
     loaders: [
-      {
-        // Test expects a RegExp, note the slashes
-        test: /\.css$/,
-        // loaders are evaluated from right to left: so css-loader first, then style-loader
-        loaders: ['style', 'css'],
-        // Include accepts either a path or an array of paths
-        include: PATHS.app
-      },
       // Set up jsx. This accepts js too thanks to RegExp
       {
         test: /\.jsx?$/,
@@ -90,6 +83,18 @@ if (TARGET === 'start' || !TARGET) {
       host: process.env.HOST,
       port: process.env.PORT
     },
+    module: {
+      loaders: [
+        {
+          // Test expects a RegExp, note the slashes
+          test: /\.css$/,
+          // loaders are evaluated from right to left: so css-loader first, then style-loader
+          loaders: ['style', 'css'],
+          // Include accepts either a path or an array of paths
+          include: PATHS.app
+        }
+      ]
+    },
     plugins: [
       new webpack.HotModuleReplacementPlugin(),
       new NpmInstallPlugin({
@@ -112,6 +117,16 @@ if (TARGET === 'build') {
       filename: '[name].[chunkhash].js',
       chunkFilename: '[chunkhash].js'
     },
+    module: {
+      loaders: [
+        // Extract CSS during build
+        {
+          test: /\.css$/,
+          loader: ExtractTextPlugin.extract('style', 'css'),
+          include: PATHS.app
+        }
+      ]
+    },
     plugins: [
       new CleanPlugin([PATHS.build]),
       // Extract vendor and manifest files
@@ -126,6 +141,9 @@ if (TARGET === 'build') {
         compress: {
           warnings: false
         }
-      })]
+      }),
+      // Output extracted CSS to a file
+      new ExtractTextPlugin('[name].[chunkhash].css')
+    ]
   });
 }
